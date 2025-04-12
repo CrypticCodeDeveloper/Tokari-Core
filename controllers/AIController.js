@@ -43,7 +43,7 @@ const handlePrompt = async (req, res) => {
 const generateImage = async (req, res) => {
 
     const options = {
-        provider: "Dalle2",
+        provider: "StableDiffusion",
     };
 
     const provider = GPT4js.createProvider(options.provider);

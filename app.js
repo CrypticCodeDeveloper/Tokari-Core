@@ -1,18 +1,23 @@
-var createError = require("http-errors");
-var express = require("express");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+const createError = require("http-errors");
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+require("express-async-errors");
 
 const mongoose = require("mongoose");
+
+// Routes
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
-const aiRoutes = require('./routes/aiRoutes')
+const AIRoutes = require('./routes/AIRoutes')
+const projectRoutes = require('./routes/projectRoutes')
+
+
 const dotenv = require("dotenv");
 const cors = require("cors");
-require("express-async-errors");
 dotenv.config();
 
-var app = express();
+const app = express();
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -27,7 +32,8 @@ app.use(
 // Routes
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/nexora", aiRoutes);
+app.use("/api/v1/nexora", AIRoutes);
+app.use("/api/v1/projects", projectRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -35,15 +41,17 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get("env") === "development" ? err : {};
+app.use(function (err, req, res, next) {
+    const statusCode = err.status || 500;
 
-    // render the error message
-    res.status(err.status || 500).json({
-        Error: err.name,
+    if (req.app.get("env") === "development") {
+        console.error(err.stack);
+    }
+
+    res.status(statusCode).json({
+        error: err.name || "InternalServerError",
         message: err.message,
+        ...(req.app.get("env") === "development" && { stack: err.stack }),
     });
 });
 

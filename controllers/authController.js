@@ -29,6 +29,7 @@ const signIn = async (req, res) => {
         // If user password is correct
         const token = jwt.sign(
             {
+                id: user._id,
                 name: user.name,
                 email: user.email,
             },
