@@ -58,13 +58,21 @@ app.use(function (err, req, res, next) {
 // Start Server
 const PORT = process.env.PORT || 5500;
 
+let connectionString;
+
+if (process.env.NODE_ENV === "production") {
+    connectionString = process.env.MONGODB_URI;
+} else if (process.env.NODE_ENV === "development") {
+    connectionString = process.env.MONGODB_LOCAL_STRING;
+}
+
 // connect to database
 mongoose
-    .connect(process.env.MONGODB_LOCAL_STRING)
+    .connect(connectionString)
     .then(
         app.listen(PORT, () => {
             console.log(
-                `DB connected and server is up and running on http://localhost:${PORT}`
+                `DB connected and server is up and running on port ${PORT}`
             );
         })
     )
