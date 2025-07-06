@@ -2,6 +2,12 @@ const bcrypt = require("bcrypt");
 const User = require("../models/UserModel");
 const jwt = require("jsonwebtoken");
 
+const generateAccessToken = (user) => {
+    return jwt.sign(user, process.env.JWT_SECRET_KEY, {
+        expiresIn: '3d'
+    })
+}
+
 const signIn = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -26,23 +32,35 @@ const signIn = async (req, res) => {
             });
         }
 
-        // If user password is correct
-        const token = jwt.sign(
-            {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-            },
-            process.env.JWT_SECRET_KEY,
+        const payload = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+        }
+
+        const refreshToken = jwt.sign(
+            payload,
+            process.env.JWT_REFRESH_SECRET,
             {
                 expiresIn: "3d",
             }
         );
+
+        res.cookie("refreshToken", refreshToken, {
+            secure: true,
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24 * 7
+        })
+
+        const token = generateAccessToken(payload);
+
         res.status(200).json({
             message: "user signed in successfully",
             user,
-            token,
+            accessToken: token,
+            refreshToken
         });
+
     }
 };
 
@@ -74,7 +92,33 @@ const createUser = async (req, res) => {
     });
 };
 
+const refreshAcessToken = async (req, res) => {
+    const {refreshToken} = req.body
+
+
+    if (!refreshToken) return res.status(401).json({
+        message: "refresh access token not found.",
+    })
+
+    const verifiedToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, {
+        expiresIn: '15m'
+    });
+
+    if (!verifiedToken) return res.status(403).json({
+        message: "Unauthorized."
+    })
+
+    const {id, name, email} = verifiedToken
+
+    const accessToken = generateAccessToken({id, name, email});
+
+    res.status(200).json({
+        accessToken
+    })
+}
+
 module.exports = {
     signIn,
     createUser,
+    refreshAcessToken,
 };

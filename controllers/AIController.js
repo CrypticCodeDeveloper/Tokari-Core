@@ -6,10 +6,14 @@ getGpt4Js().then(
     }
 )
 
+const Project = require("../models/projectModel")
+
 
 const handlePrompt = async (req, res) => {
 
     const {role, prompt} = req.body;
+    const user = req.user;
+    const origin = req.origin;
 
     if (!prompt) {
         return res.status(403).json({
@@ -18,24 +22,35 @@ const handlePrompt = async (req, res) => {
     }
 
     const messages = [
-        {role: "system", content: role || null},
+        {role: "system", content: role || "You are a helpful assistant"},
         {role: "user", content: prompt},
     ];
 
     const options = {
         provider: "Nextway",
         model: "gpt-3.5-turbo",
-        // response_type: 'json',
-        response_format: 'json',
     };
 
     const provider = await GPT4js.createProvider(options.provider);
-    const text = await provider.chatCompletion(messages, options, (data) => {
+    const response = await provider.chatCompletion(messages, options, (data) => {
         console.log(data);
     });
 
+    await Project.findOneAndUpdate(
+        {userId: user.id, origin},
+        {
+            $inc: {
+                token_used: 6,
+                requests: 1,
+                monthly_cost: 0.05,
+            }, $currentDate: {
+                last_used: true,
+            }
+        })
+
+
     res.status(200).json({
-        message: text || 'No response'
+        response,
     })
 
 }

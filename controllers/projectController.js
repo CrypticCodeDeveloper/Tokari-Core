@@ -2,16 +2,19 @@ const Project = require('../models/projectModel')
 const {v4: uuidv4} = require('uuid')
 
 const createProject = async (req, res) => {
+
     const {name, description, origin} = req.body
     const normalizedOrigin = origin.trim().toLowerCase().replace(/\/$/, '');
-    const apiKey = uuidv4().replace(/-/g, '')
+
+    const api_key = uuidv4().replace(/-/g, '')
     const user = req.user;
 
     // Checking number of projects user has created
     const userProjects = await Project.find({userId: user.id})
 
     // Finds if project exists per user
-    const isProjectExisting = await Project.findOne({origin: normalizedOrigin, userId: user.id})
+    const isProjectExisting =
+        await Project.findOne({origin: normalizedOrigin, userId: user.id})
 
     if (isProjectExisting) {
         return res.status(409).json({
@@ -31,7 +34,7 @@ const createProject = async (req, res) => {
         name,
         description,
         origin: normalizedOrigin,
-        apiKey,
+        api_key,
         userId: user.id,
     })
 

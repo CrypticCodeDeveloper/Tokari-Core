@@ -4,7 +4,27 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 require("express-async-errors");
 
+const app = express();
+
 const mongoose = require("mongoose");
+const session = require('express-session')
+const passport = require("passport")
+
+const dotenv = require("dotenv");
+const cors = require("cors");
+dotenv.config();
+
+app.use(
+    cors({
+        origin: "*",
+        withCredentials: true,
+    })
+);
+
+app.use(logger("dev"));
+app.use(express.json());
+app.use(express.urlencoded({extended: false}));
+app.use(cookieParser());
 
 // Routes
 const userRoutes = require("./routes/userRoutes");
@@ -13,26 +33,20 @@ const AIRoutes = require('./routes/AIRoutes')
 const projectRoutes = require('./routes/projectRoutes')
 
 
-const dotenv = require("dotenv");
-const cors = require("cors");
-dotenv.config();
+app.use(session({
+    secret: process.env.SESSION_KEY,
+    resave: false,
+    saveUninitialized: false,
+}))
 
-const app = express();
+app.use(passport.initialize());
+app.use(passport.session())
 
-app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({extended: false}));
-app.use(cookieParser());
-app.use(
-    cors({
-        origin: "*",
-    })
-);
 
 // Routes
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/nexora", AIRoutes);
+app.use("/api/v1/chat-completions", AIRoutes);
 app.use("/api/v1/projects", projectRoutes);
 
 // catch 404 and forward to error handler
