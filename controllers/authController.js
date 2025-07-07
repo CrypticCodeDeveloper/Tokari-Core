@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const generateAccessToken = (user) => {
     return jwt.sign(user, process.env.JWT_SECRET_KEY, {
-        expiresIn: '3d'
+        expiresIn: '15m'
     })
 }
 
@@ -47,7 +47,7 @@ const signIn = async (req, res) => {
         );
 
         res.cookie("refreshToken", refreshToken, {
-            secure: true,
+            secure: false,
             httpOnly: true,
             maxAge: 1000 * 60 * 60 * 24 * 7
         })
@@ -58,7 +58,6 @@ const signIn = async (req, res) => {
             message: "user signed in successfully",
             user,
             accessToken: token,
-            refreshToken
         });
 
     }
@@ -69,7 +68,7 @@ const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hashSync(password, 10);
 
     // Check if user exists
-    const isExistingUser = await User.findOne({ email });
+    const isExistingUser = await User.findOne({ email }).select("-password");
 
     if (!isExistingUser) {
         // create a new user
@@ -93,7 +92,7 @@ const createUser = async (req, res) => {
 };
 
 const refreshAcessToken = async (req, res) => {
-    const {refreshToken} = req.body
+    const refreshToken = req.cookies['refreshToken']
 
 
     if (!refreshToken) return res.status(401).json({

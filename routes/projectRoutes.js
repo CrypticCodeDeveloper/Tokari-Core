@@ -1,19 +1,26 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const jwtAuthMiddleware = require('../Middlewares/jwtAuthMiddlware');
-const {createProject, getProjectById, getAllProjects, deleteProjectById} = require('../controllers/projectController')
+const jwtAuthMiddleware = require("../Middlewares/jwtAuthMiddlware");
+const {
+  createProject,
+  getProjectById,
+  getAllProjects,
+  deleteProjectById,
+  getProjectStats
+} = require("../controllers/projectController");
 
 // Create a project
-router.post('/', jwtAuthMiddleware, createProject)
+router.post("/", jwtAuthMiddleware, createProject);
+router.get("/general-stats", jwtAuthMiddleware, getProjectStats);
 
 // Get all projects
-router.get('/', jwtAuthMiddleware, getAllProjects)
+router.get("/", jwtAuthMiddleware, getAllProjects);
 
 // Get project by id
-router.get('/:id', jwtAuthMiddleware, getProjectById)
+router.get("/:id", jwtAuthMiddleware, getProjectById);
 
 // Delete project by id
-router.delete('/:id', jwtAuthMiddleware, deleteProjectById)
+router.delete("/:id", jwtAuthMiddleware, deleteProjectById);
 
 // Update project by id
 

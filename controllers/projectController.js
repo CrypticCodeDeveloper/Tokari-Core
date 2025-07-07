@@ -90,10 +90,27 @@ const deleteProjectById = async (req, res) => {
     }
 }
 
+const getProjectStats = async (req, res) => {
+    const user = req.user
+    const allProjects = await Project.find({userId: user.id})
+
+
+    return res.status(200).json({
+        stats: {
+            total_calls: allProjects.reduce((sum, project) => sum + project.requests, 0),
+            total_projects: allProjects.length,
+            total_tokens: allProjects.reduce((sum, project) => sum + project.token_used, 0),
+            total_cost: allProjects.reduce((sum, project) => sum + project.monthly_cost, 0),
+
+        }
+    })
+}
+
 
 module.exports = {
     createProject,
     getAllProjects,
     getProjectById,
     deleteProjectById,
+    getProjectStats,
 }
