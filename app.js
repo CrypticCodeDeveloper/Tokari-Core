@@ -44,6 +44,10 @@ app.use(passport.session())
 
 
 // Routes
+app.get("/" , (req, res) => {
+    res.send("Tokari Core - Plug AI into your app in minutes.")
+})
+
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/chat-completions", AIRoutes);
@@ -80,15 +84,19 @@ if (process.env.NODE_ENV === "production") {
     connectionString = process.env.MONGODB_LOCAL_STRING;
 }
 
+console.log(connectionString)
+
 // connect to database
 mongoose
     .connect(connectionString)
     .then(
-        app.listen(PORT, () => {
+        () => {
+            app.listen(PORT, () => {
             console.log(
                 `DB connected and server is up and running on port ${PORT}`
             );
         })
+        }
     )
     .catch((err) => console.log("Unable to connect to db: ", err.message));
 

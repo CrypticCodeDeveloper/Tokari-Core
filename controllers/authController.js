@@ -36,14 +36,12 @@ const signIn = async (req, res) => {
             id: user._id,
             name: user.name,
             email: user.email,
+            profile_image: user.profile_image,
         }
 
         const refreshToken = jwt.sign(
             payload,
-            process.env.JWT_REFRESH_SECRET,
-            {
-                expiresIn: "3d",
-            }
+            process.env.JWT_REFRESH_SECRET
         );
 
         res.cookie("refreshToken", refreshToken, {
@@ -99,17 +97,17 @@ const refreshAcessToken = async (req, res) => {
         message: "refresh access token not found.",
     })
 
-    const verifiedToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, {
+    const decodedToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, {
         expiresIn: '15m'
     });
 
-    if (!verifiedToken) return res.status(403).json({
+    if (!decodedToken) return res.status(403).json({
         message: "Unauthorized."
     })
 
-    const {id, name, email} = verifiedToken
+    const {id, name, email, profile_image} = decodedToken
 
-    const accessToken = generateAccessToken({id, name, email});
+    const accessToken = generateAccessToken({id, name, email, profile_image});
 
     res.status(200).json({
         accessToken
