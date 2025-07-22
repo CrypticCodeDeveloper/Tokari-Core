@@ -4,10 +4,8 @@ const verifyProjectKeyAndOrigin = async (req, res, next) => {
     const api_key = req.headers['x-api-key']
     const isProjectExisting = await Project.findOne({api_key}).populate("userId")
     const user = isProjectExisting.userId
-    const protocol = req.protocol;
-    const host = req.headers['host'];
 
-    const origin = `${protocol}://${host}`;
+    const origin = req.get("Origin")
 
 
     if (!api_key) {
@@ -29,7 +27,6 @@ const verifyProjectKeyAndOrigin = async (req, res, next) => {
     }
 
     req.origin = origin
-    console.log(user)
     req.user = user
     next()
 
