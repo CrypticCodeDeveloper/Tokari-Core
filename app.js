@@ -9,37 +9,9 @@ const app = express();
 const mongoose = require("mongoose");
 const session = require('express-session')
 const passport = require("passport")
-
 const dotenv = require("dotenv");
-const cors = require("cors");
-const Projects = require("./models/projectModel")
+const cors = require('cors')
 dotenv.config();
-
-let allowedOrigins = ["http://localhost:5173", "https://tokari-core.vercel.app"];
-
-app.use(async (req, res, next) => {
-    const projects = await Projects.find({}, "origin");
-    const projectOrigins = [...new Set(projects.map(project => project.origin))];
-    allowedOrigins = [...projectOrigins, "http://localhost:5173", "https://tokari-core.vercel.app"];
-    console.log(allowedOrigins)
-    next();
-});
-
-app.use(
-    cors({
-        origin: function (origin, callback) {
-            // Allow requests with no origin (like mobile apps, curl)
-            if (!origin) return callback(null, true);
-            if (allowedOrigins.includes(origin)) {
-                return callback(null, true);
-            } else {
-                return callback(new Error("Not allowed by CORS"));
-            }
-        },
-        credentials: true,
-    })
-);
-
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -47,10 +19,14 @@ app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 
 // Routes
-const userRoutes = require("./routes/userRoutes");
-const authRoutes = require("./routes/authRoutes");
-const AIRoutes = require('./routes/AIRoutes')
-const projectRoutes = require('./routes/projectRoutes')
+const AIRoutes = require('./routes/ai-routes')
+
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}))
+const userRoutes = require("./routes/user-routes");
+const authRoutes = require("./routes/auth-routes");
 
 
 app.use(session({
@@ -68,10 +44,9 @@ app.get("/" , (req, res) => {
     res.send("Tokari Core - Plug AI into your app in minutes.")
 })
 
+app.use("/api/v1/ai", AIRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/chat-completions", AIRoutes);
-app.use("/api/v1/projects", projectRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -1,4 +1,4 @@
-const User = require("../models/UserModel");
+const User = require("../models/user-model");
 
 const getAllUsers = async (req, res) => {
     const allUsers = await User.find({});
@@ -8,6 +8,16 @@ const getAllUsers = async (req, res) => {
         users: allUsers,
     });
 };
+
+const getCurrentUserDetails = async ( req, res) => {
+    const { email } = req.user;
+
+    const user = await User.findOne({email}).select("-password");
+    return res.status(200).json({
+        message: "get current user details",
+        user,
+    });
+}
 
 const getUserById = async (req, res) => {
     const { id } = req.params;
@@ -73,4 +83,5 @@ module.exports = {
     getUserById,
     editUserById,
     deleteUserById,
+    getCurrentUserDetails,
 };

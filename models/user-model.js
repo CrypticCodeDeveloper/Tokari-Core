@@ -17,18 +17,6 @@ const userSchema = new mongoose.Schema({
             return this.provider === "local"
         }, "input a password"],
     },
-    googleId: {
-        type: String,
-        required: [function () {
-            return this.provider === "google"
-        }, "googleId is required for google authenticated users"]
-    },
-    provider: {
-        type: String,
-        enum: ["local", "google"],
-        default: "local",
-        required: true,
-    },
     profile_image : {
         type: String,
         default: function () {
@@ -36,7 +24,15 @@ const userSchema = new mongoose.Schema({
             return profilePictures[profileIndex]
         },
         required: [true, "profile picture is required"]
-    }
+    },
+    apiKey: {
+        type: String,
+        default: null,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
+    },
 }, {timestamps: true});
 
 module.exports = mongoose.model("User", userSchema);
