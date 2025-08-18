@@ -17,7 +17,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
                 subject: "Verify your email",
                 html: `<h1>Welcome to Tokari</h1>
                        <p>Click the link below to verify your email address:</p>
-                       <a href="http://localhost:5500/api/v1/auth/verify?verificationToken=${verificationToken}">Verify Email</a>
+                       <a href="${process.env.SERVER_BASE_URL}/api/v1/auth/verify?verificationToken=${verificationToken}">Verify Email</a>
                        <p>This link will expire in 10 mins.</p>`
             })
 }
