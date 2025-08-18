@@ -22,7 +22,7 @@ app.use(cookieParser());
 const AIRoutes = require('./routes/ai-routes')
 
 app.use(cors({
-    origin: "https://tokari-core.onrender.com",
+    origin: "https://tokari-core.vercel.app",
     credentials: true,
 }))
 const userRoutes = require("./routes/user-routes");
